@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// PostgreSQL 연결 문자열
-	connStr := "user=postgres password=8576 dbname=postgres sslmode=disable host=localhost port=5432"
+	connStr := "user=postgres password=password dbname=dbname sslmode=disable host=localhost port=5432"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
