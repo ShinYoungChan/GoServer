@@ -1,0 +1,17 @@
+{{ template "header.html" . }}
+{{ template "menu.html" . }}
+
+<form action="/article/edit/{{.payload.ID}}" method="POST">
+    <input type="text" name="title" value="{{.payload.Title}}">
+    <textarea name="content">{{.payload.Content}}</textarea>
+    <button type="submit">수정 완료</button>
+</form>
+
+{{ if .ErrorTitle }}
+<script>
+    // 서버에서 전달받은 메시지를 alert로 띄웁니다.
+    alert("{{ .ErrorTitle }}");
+</script>
+{{ end }}
+
+{{ template "footer.html" . }}

@@ -1,0 +1,36 @@
+<!--article.html-->
+
+<!-- header.html 템플릿을 이 위치에 포함시킵니다 -->
+{{ template "header.html" .}}
+
+<!--기사 제목을 표시합니다-->
+<h1>{{.payload.Title}}</h1>
+
+<!--기사 본문 내용을 표시합니다-->
+<p>{{.payload.Content}}</p>
+
+<a href="/article/edit/{{.payload.ID}}">
+    <button type="button">수정하기</button>
+</a>
+
+<button type="button" onclick="deleteArticle('{{.payload.ID}}')">삭제</button>
+
+<script>
+function deleteArticle(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+
+    // 자바스크립트로 진짜 DELETE 요청을 보냅니다.
+    fetch('/article/' + id, {
+        method: 'DELETE',
+    }).then(response => {
+        if (response.ok) {
+            window.location.href ="/"
+        } else {
+            alert('삭제 실패!');
+        }
+    });
+}
+</script>
+
+<!-- footer.html 템플릿을 이 위치에 포함시킵니다 -->
+{{ template "footer.html" .}}
