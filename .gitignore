@@ -1,3 +1,4 @@
 go.mod
 go.sum
 article.db
+postgre.env
