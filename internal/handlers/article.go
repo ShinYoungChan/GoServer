@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -136,4 +137,36 @@ func PerformCreateUser(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusMovedPermanently, "/")
+}
+
+func ShowLoginPage(c *gin.Context) {
+	c.HTML(
+		http.StatusOK,
+		"login.html",
+		gin.H{
+			"title": "로그인",
+		},
+	)
+}
+
+func PerformLogin(c *gin.Context) {
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+
+	fmt.Printf("로그인 시도 ID: %s, PW 길이: %d\n", username, len(password))
+
+	user, err := models.LoginCheck(username, password)
+
+	if err != nil {
+		c.HTML(http.StatusBadRequest, "login.html", gin.H{
+			"Error": "아이디 또는 비밀번호가 일치하지 않습니다.",
+		})
+		return
+	}
+
+	fmt.Println("로그인 성공! 유저 ID: ", user.ID)
+
+	// 로그인 성공 시 쿠키 설정 예시
+	c.SetCookie("user_id", fmt.Sprintf("%d", user.ID), 3600, "/", "", false, true)
+	c.Redirect(http.StatusSeeOther, "/")
 }
