@@ -10,6 +10,16 @@ type Article struct {
 	Content string `json:"content"`
 }
 
+// Article 구조체 하단에 추가
+func (a Article) FormattedCreatedAt() string {
+	// 2006-01-02 15:04:05는 Go 언어의 날짜 포맷 규칙입니다 (바꾸면 안 돼요!)
+	return a.CreatedAt.Format("2006-01-02 15:04")
+}
+
+func (a Article) FormattedUpdatedAt() string {
+	return a.UpdatedAt.Format("2006-01-02 15:04")
+}
+
 /* gorm model 추가로 주석처리
 var articleList = []Article{
 	{ID: 1, Title: "Article 1", Content: "Article 1 body"},

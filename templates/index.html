@@ -9,16 +9,14 @@
   </a>
 </div>
 
-  <!--Loop over the `payload` variable, which is the list of articles-->
-  {{range .payload }}
-    <!-- ID를 기준으로 기사에 대한 링크를 만듭니다. -->
-    <a href="/article/view/{{.ID}}">
-      <!-- 기사의 제목을 표시 -->
-      <h2>{{.Title}}</h2>
-    </a>
-    <!-- 기사의 컨텐츠를 표시 -->
-    <p>{{.Content}}</p>
-  {{end}}
+<ul>
+  {{ range .payload }}
+  <li>
+      <a href="/article/view/{{.ID}}">{{.Title}}</a>
+      <small style="color: gray;">({{.FormattedCreatedAt}})</small>
+  </li>
+  {{ end }}
+</ul>
 
 <!-- footer.html 템플릿을 이 위치에 포함시킵니다 -->
 {{ template "footer.html" .}}
