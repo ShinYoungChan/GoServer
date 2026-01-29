@@ -13,7 +13,7 @@ type Article struct {
 type User struct {
 	gorm.Model
 	Username string `gorm:"unique;not null"`
-	Passwore string `gorm:"not null"`
+	Password string `gorm:"not null"`
 }
 
 // Article 구조체 하단에 추가

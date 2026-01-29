@@ -25,4 +25,8 @@ func Register(r *gin.Engine) {
 		// 수정된 데이터 처리하기
 		aritlcleRoutes.POST("/edit/:article_id", handlers.PerformUpdateArticle)
 	}
+
+	// 회원가입
+	r.GET("/register", handlers.ShowRegisterPage)
+	r.POST("/register", handlers.PerformCreateUser)
 }

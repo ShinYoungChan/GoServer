@@ -111,3 +111,29 @@ func PerformUpdateArticle(c *gin.Context) {
 
 	c.Redirect(http.StatusMovedPermanently, "/article/view/"+strconv.Itoa(id))
 }
+
+func ShowRegisterPage(c *gin.Context) {
+	c.HTML(
+		http.StatusOK,
+		"register.html",
+		gin.H{
+			"title": "회원가입",
+		},
+	)
+}
+
+func PerformCreateUser(c *gin.Context) {
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+
+	err := models.CreateUser(username, password)
+	if err != nil {
+		// 이미 존재하는 아이디일 가능성이 높음
+		c.HTML(http.StatusBadRequest, "register.html", gin.H{
+			"Error": "이미 사용 중인 아이디거나 가입에 실패했습니다.",
+		})
+		return
+	}
+
+	c.Redirect(http.StatusMovedPermanently, "/")
+}
