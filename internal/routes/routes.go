@@ -26,6 +26,10 @@ func Register(r *gin.Engine) {
 		aritlcleRoutes.POST("/edit/:article_id", handlers.PerformUpdateArticle)
 	}
 
+	// 로그인
+	r.GET("/login", handlers.ShowLoginPage)
+	r.POST("/login", handlers.PerformLogin)
+
 	// 회원가입
 	r.GET("/register", handlers.ShowRegisterPage)
 	r.POST("/register", handlers.PerformCreateUser)
