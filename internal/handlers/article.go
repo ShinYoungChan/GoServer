@@ -102,7 +102,7 @@ func PerformUpdateArticle(c *gin.Context) {
 		// 제목이 비어있거나 공백만 있다면 에러 메시지와 함께 중단
 		c.HTML(http.StatusBadRequest, "edit_article.html", gin.H{
 			"ErrorTitle": "제목은 필수입니다.",
-			"payload":    models.Article{ID: id, Title: title, Content: content}, // 기존 데이터 유지
+			"payload":    models.Article{Title: title, Content: content}, // 기존 데이터 유지
 		})
 		return
 	}
