@@ -10,6 +10,12 @@ type Article struct {
 	Content string `json:"content"`
 }
 
+type User struct {
+	gorm.Model
+	Username string `gorm:"unique;not null"`
+	Passwore string `gorm:"not null"`
+}
+
 // Article 구조체 하단에 추가
 func (a Article) FormattedCreatedAt() string {
 	// 2006-01-02 15:04:05는 Go 언어의 날짜 포맷 규칙입니다 (바꾸면 안 돼요!)

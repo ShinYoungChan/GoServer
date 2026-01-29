@@ -33,5 +33,5 @@ func InitDB() {
 		panic("PostgreSQL 연결 실패: " + err.Error())
 	}
 
-	DB.AutoMigrate(&Article{})
+	DB.AutoMigrate(&Article{}, &User{})
 }
