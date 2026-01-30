@@ -10,13 +10,21 @@
 </div>
 
 <ul>
-  {{ range .payload }}
+  {{ range .articles }}
   <li>
       <a href="/article/view/{{.ID}}">{{.Title}}</a>
       <small style="color: gray;">({{.FormattedCreatedAt}})</small>
   </li>
   {{ end }}
 </ul>
+
+{{ if .user }}
+    <span>안녕하세요, <strong>{{ .user.Username }}</strong>님!</span>
+    <a href="/logout">로그아웃</a>
+{{ else }}
+    <a href="/login">로그인</a>
+    <a href="/register">회원가입</a>
+{{ end }}
 
 <!-- footer.html 템플릿을 이 위치에 포함시킵니다 -->
 {{ template "footer.html" .}}

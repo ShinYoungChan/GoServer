@@ -3,19 +3,19 @@
 <!-- header.html 템플릿을 이 위치에 포함시킵니다 -->
 {{ template "header.html" .}}
 
-<h1>{{.payload.Title}}</h1>
-<p style="color: gray;">작성일: {{.payload.FormattedCreatedAt}}</p>
+<h1>{{.articles.Title}}</h1>
+<p style="color: gray;">작성일: {{.articles.FormattedCreatedAt}}</p>
 <hr>
-{{ if ne .payload.CreatedAt .payload.UpdatedAt }}
-    <p style="color: blue;">(수정됨: {{.payload.FormattedUpdatedAt}})</p>
+{{ if ne .articles.CreatedAt .articles.UpdatedAt }}
+    <p style="color: blue;">(수정됨: {{.articles.FormattedUpdatedAt}})</p>
 {{ end }}
-<p>{{.payload.Content}}</p>
+<p>{{.articles.Content}}</p>
 
-<a href="/article/edit/{{.payload.ID}}">
+<a href="/article/edit/{{.articles.ID}}">
     <button type="button">수정하기</button>
 </a>
 
-<button type="button" onclick="deleteArticle('{{.payload.ID}}')">삭제</button>
+<button type="button" onclick="deleteArticle('{{.articles.ID}}')">삭제</button>
 
 <script>
 function deleteArticle(id) {

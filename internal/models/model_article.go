@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -37,6 +39,8 @@ var articleList = []Article{
 func GetAllArticles() []Article {
 	var articles []Article
 	DB.Find(&articles) // SELECT * FROM articles;
+
+	fmt.Println("가져온 글 개수:", len(articles))
 	return articles
 }
 

@@ -33,4 +33,7 @@ func Register(r *gin.Engine) {
 	// 회원가입
 	r.GET("/register", handlers.ShowRegisterPage)
 	r.POST("/register", handlers.PerformCreateUser)
+
+	// 로그아웃
+	r.GET("/logout", handlers.PerformLogout)
 }
