@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,20 +12,12 @@ import (
 
 func ShowIndexPage(c *gin.Context) {
 	articles := models.GetAllArticles()
+	user := GetCurrentUser(c) // 헬퍼 함수 사용!
 
-	// ---- Context의 HTML 메소드를 호출하여 템플릿을 렌더링합니다 ---- //
-	c.HTML(
-		// ----- HTTP Status를 200(OK)로 설정합니다 ------ //
-		http.StatusOK,
-		// ----- index.html 템플릿을 사용합니다 ------ //
-		"index.html",
-		// ---- 페이지에서 사용하는 데이터를 전달합니다 ----- //
-		gin.H{
-			"title":   "Home Page",
-			"payload": articles,
-		},
-	)
-
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"articles": articles,
+		"user":     user, // 템플릿으로 유저 정보 전달
+	})
 }
 
 func GetArticle(c *gin.Context) {
@@ -39,8 +30,8 @@ func GetArticle(c *gin.Context) {
 				http.StatusOK,
 				"article.html",
 				gin.H{
-					"title":   article.Title,
-					"payload": article,
+					"title":    article.Title,
+					"articles": article,
 				},
 			)
 
@@ -85,7 +76,7 @@ func ShowArticleEditPage(c *gin.Context) {
 	if articleID, err := strconv.Atoi(c.Param("article_id")); err == nil {
 		if article, err := models.GetArticleByID(articleID); err == nil {
 			c.HTML(http.StatusOK, "edit_article.html", gin.H{
-				"payload": article,
+				"articles": article,
 			})
 		} else {
 			c.AbortWithError(http.StatusNotFound, err)
@@ -103,7 +94,7 @@ func PerformUpdateArticle(c *gin.Context) {
 		// 제목이 비어있거나 공백만 있다면 에러 메시지와 함께 중단
 		c.HTML(http.StatusBadRequest, "edit_article.html", gin.H{
 			"ErrorTitle": "제목은 필수입니다.",
-			"payload":    models.Article{Title: title, Content: content}, // 기존 데이터 유지
+			"articles":   models.Article{Title: title, Content: content}, // 기존 데이터 유지
 		})
 		return
 	}
@@ -111,62 +102,4 @@ func PerformUpdateArticle(c *gin.Context) {
 	models.UpdateArticle(id, title, content)
 
 	c.Redirect(http.StatusMovedPermanently, "/article/view/"+strconv.Itoa(id))
-}
-
-func ShowRegisterPage(c *gin.Context) {
-	c.HTML(
-		http.StatusOK,
-		"register.html",
-		gin.H{
-			"title": "회원가입",
-		},
-	)
-}
-
-func PerformCreateUser(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-
-	err := models.CreateUser(username, password)
-	if err != nil {
-		// 이미 존재하는 아이디일 가능성이 높음
-		c.HTML(http.StatusBadRequest, "register.html", gin.H{
-			"Error": "이미 사용 중인 아이디거나 가입에 실패했습니다.",
-		})
-		return
-	}
-
-	c.Redirect(http.StatusMovedPermanently, "/")
-}
-
-func ShowLoginPage(c *gin.Context) {
-	c.HTML(
-		http.StatusOK,
-		"login.html",
-		gin.H{
-			"title": "로그인",
-		},
-	)
-}
-
-func PerformLogin(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-
-	fmt.Printf("로그인 시도 ID: %s, PW 길이: %d\n", username, len(password))
-
-	user, err := models.LoginCheck(username, password)
-
-	if err != nil {
-		c.HTML(http.StatusBadRequest, "login.html", gin.H{
-			"Error": "아이디 또는 비밀번호가 일치하지 않습니다.",
-		})
-		return
-	}
-
-	fmt.Println("로그인 성공! 유저 ID: ", user.ID)
-
-	// 로그인 성공 시 쿠키 설정 예시
-	c.SetCookie("user_id", fmt.Sprintf("%d", user.ID), 3600, "/", "", false, true)
-	c.Redirect(http.StatusSeeOther, "/")
 }
