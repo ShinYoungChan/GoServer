@@ -8,8 +8,9 @@ import (
 
 type Article struct {
 	gorm.Model
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	Title   string `gorm:"not null"`
+	Content string `gorm:"not null"`
+	UserID  uint
 }
 
 type User struct {
@@ -52,6 +53,8 @@ func GetArticleByID(id int) (*Article, error) {
 	return &article, nil
 }
 
+/*
+// DB 직접 호출로 함수 불필요 주석처리
 func CreateNewArticle(title, content string) (*Article, error) {
 	newArticle := Article{Title: title, Content: content}
 	if err := DB.Create(&newArticle).Error; err != nil {
@@ -63,6 +66,7 @@ func CreateNewArticle(title, content string) (*Article, error) {
 func DeleteArticleById(id int) {
 	DB.Delete(&Article{}, id)
 }
+*/
 
 func UpdateArticle(id int, title, content string) {
 	var article Article

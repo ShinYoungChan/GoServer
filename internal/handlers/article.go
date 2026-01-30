@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,27 +22,23 @@ func ShowIndexPage(c *gin.Context) {
 }
 
 func GetArticle(c *gin.Context) {
-	// ----- 기사 ID가 유효한지 확인합니다 ----- //
 	if articleID, err := strconv.Atoi(c.Param("article_id")); err == nil {
-		// ----- 기사가 존재하는지 확인합니다 ----- //
 		if article, err := models.GetArticleByID(articleID); err == nil {
-			// Call the HTML method of the Context to render a template
+			// 1. 현재 로그인한 유저 정보를 가져옴
+			user := GetCurrentUser(c)
 			c.HTML(
 				http.StatusOK,
-				"article.html",
+				"article.html", // 상세 페이지 설계도
 				gin.H{
 					"title":    article.Title,
-					"articles": article,
+					"articles": article, // 상세 페이지에선 이게 '글 하나'를 의미함
+					"user":     user,    // 2. 유저 정보를 보따리에 넣어줍니다
 				},
 			)
-
 		} else {
-			// ---- 기사를 찾을 수 없는 경우 오류와 함께 중단합니다 ---- //
 			c.AbortWithError(http.StatusNotFound, err)
 		}
-
 	} else {
-		// ---- URL에 잘못된 기사 ID가 지정된 경우 오류와 함께 중단합니다 ---- //
 		c.AbortWithStatus(http.StatusNotFound)
 	}
 }
@@ -57,19 +54,43 @@ func ShowArticleCreatePage(c *gin.Context) {
 }
 
 func PerformCreateArticle(c *gin.Context) {
+	user := GetCurrentUser(c)
+
+	if user == nil {
+		c.Redirect(http.StatusSeeOther, "/login")
+		return
+	}
+
 	title := c.PostForm("title")
 	content := c.PostForm(("content"))
 
-	models.CreateNewArticle(title, content)
+	article := models.Article{Title: title, Content: content, UserID: user.ID}
+	models.DB.Create(&article)
 
-	c.Redirect(http.StatusMovedPermanently, "/")
+	c.Redirect(http.StatusSeeOther, "/")
 }
 
-func DeleteArticle(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("article_id"))
-	models.DeleteArticleById(id)
+func PerformDeleteArticle(c *gin.Context) {
+	user := GetCurrentUser(c)
+	articleID := c.Param("article_id")
 
-	c.JSON(http.StatusOK, gin.H{"message": "삭제완료"})
+	var article models.Article
+	models.DB.First(&article, articleID)
+
+	// PerformArticleDelete 내부
+	fmt.Printf("현재 로그인 유저 ID: %d\n", user.ID)
+	fmt.Printf("글에 저장된 주인 ID: %d\n", article.UserID)
+
+	if user == nil || article.UserID != user.ID {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "본인 글만 삭제할 수 있습니다",
+		})
+		return
+	}
+
+	models.DB.Delete(&article)
+
+	c.Redirect(http.StatusSeeOther, "/")
 }
 
 func ShowArticleEditPage(c *gin.Context) {

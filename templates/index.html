@@ -2,12 +2,13 @@
 
 <!-- header.html 템플릿을 이 위치에 포함시킵니다. -->
 {{ template "header.html" .}}
-
+<!--
 <div style="margin-bottom: 20px;">
   <a href="/article/create">
       <button type="button">새 게시글 작성하기</button>
   </a>
 </div>
+-->
 
 <ul>
   {{ range .articles }}
@@ -25,6 +26,11 @@
     <a href="/login">로그인</a>
     <a href="/register">회원가입</a>
 {{ end }}
+
+{{ if .user }}
+    <a href="/article/create"><button>새 글 쓰기</button></a>
+{{ end }}
+
 
 <!-- footer.html 템플릿을 이 위치에 포함시킵니다 -->
 {{ template "footer.html" .}}
