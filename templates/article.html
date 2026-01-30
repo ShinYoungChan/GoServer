@@ -6,17 +6,37 @@
 <h1>{{.articles.Title}}</h1>
 <p style="color: gray;">작성일: {{.articles.FormattedCreatedAt}}</p>
 <hr>
-{{ if ne .articles.CreatedAt .articles.UpdatedAt }}
+{{ if ne .articles.CreatedAt .article.UpdatedAt }}
     <p style="color: blue;">(수정됨: {{.articles.FormattedUpdatedAt}})</p>
 {{ end }}
 <p>{{.articles.Content}}</p>
 
+<!--
 <a href="/article/edit/{{.articles.ID}}">
     <button type="button">수정하기</button>
 </a>
+-->
 
-<button type="button" onclick="deleteArticle('{{.articles.ID}}')">삭제</button>
+<div style="border-bottom: 1px solid #ccc; padding: 10px;">
+    <h3>{{ .articles.Title }}</h3>
+    <p>{{ .articles.Content }}</p>
+    
+    {{ if $.user }}
+        {{ if eq $.user.ID .articles.UserID }}
+            <a href="/article/edit/{{ .articles.ID }}">수정</a>
+            
+            <form action="/article/delete/{{ .articles.ID }}" method="POST" style="display:inline;">
+                <button type="submit" onclick="return confirm('정말 삭제할까요?')" 
+                        style="background:none; border:none; color:blue; cursor:pointer; text-decoration:underline; padding:0;">
+                    삭제
+                </button>
+            </form>
+        {{ end }}
+    {{ end }}
+</div>
 
+<!--<button type="button" onclick="deleteArticle('{{.articles.ID}}')">삭제</button>-->
+<!--
 <script>
 function deleteArticle(id) {
     if (!confirm('정말 삭제하시겠습니까?')) return;
@@ -33,6 +53,7 @@ function deleteArticle(id) {
     });
 }
 </script>
+-->
 
 <!-- footer.html 템플릿을 이 위치에 포함시킵니다 -->
 {{ template "footer.html" .}}
