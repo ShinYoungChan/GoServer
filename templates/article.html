@@ -4,12 +4,11 @@
 {{ template "header.html" .}}
 
 <h1>{{.articles.Title}}</h1>
+<p>{{.articles.Content}}</p>
 <p style="color: gray;">작성일: {{.articles.FormattedCreatedAt}}</p>
-<hr>
 {{ if ne .articles.CreatedAt .article.UpdatedAt }}
     <p style="color: blue;">(수정됨: {{.articles.FormattedUpdatedAt}})</p>
 {{ end }}
-<p>{{.articles.Content}}</p>
 
 <!--
 <a href="/article/edit/{{.articles.ID}}">
@@ -18,8 +17,6 @@
 -->
 
 <div style="border-bottom: 1px solid #ccc; padding: 10px;">
-    <h3>{{ .articles.Title }}</h3>
-    <p>{{ .articles.Content }}</p>
     
     {{ if $.user }}
         {{ if eq $.user.ID .articles.UserID }}

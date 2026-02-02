@@ -106,21 +106,36 @@ func ShowArticleEditPage(c *gin.Context) {
 }
 
 func PerformUpdateArticle(c *gin.Context) {
+	user := GetCurrentUser(c)
+
+	if user == nil {
+		c.Redirect(http.StatusSeeOther, "/login")
+		return
+	}
+
 	id, _ := strconv.Atoi(c.Param("article_id"))
+
+	var article models.Article
+	models.DB.First(&article, id)
+
 	title := c.PostForm("title")
 	content := c.PostForm("content")
 
 	// ---- 데이터 검증 로직 추가 ---- //
 	if strings.TrimSpace(title) == "" {
+		article.Title = title
+		article.Content = content
+		article.UserID = user.ID
 		// 제목이 비어있거나 공백만 있다면 에러 메시지와 함께 중단
 		c.HTML(http.StatusBadRequest, "edit_article.html", gin.H{
 			"ErrorTitle": "제목은 필수입니다.",
-			"articles":   models.Article{Title: title, Content: content}, // 기존 데이터 유지
+			"articles":   article,
 		})
 		return
 	}
 
-	models.UpdateArticle(id, title, content)
+	models.UpdateArticle(id, user.ID, title, content)
 
-	c.Redirect(http.StatusMovedPermanently, "/article/view/"+strconv.Itoa(id))
+	// PerformUpdateArticle 마지막 줄
+	c.Redirect(http.StatusSeeOther, "/article/view/"+strconv.Itoa(id))
 }

@@ -68,8 +68,8 @@ func DeleteArticleById(id int) {
 }
 */
 
-func UpdateArticle(id int, title, content string) {
+func UpdateArticle(id int, userID uint, title, content string) {
 	var article Article
 	DB.First(&article, id)
-	DB.Model(&article).Updates(Article{Title: title, Content: content})
+	DB.Model(&article).Updates(Article{Title: title, Content: content, UserID: userID})
 }
