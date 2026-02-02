@@ -26,6 +26,12 @@ func Register(r *gin.Engine) {
 		aritlcleRoutes.GET("/edit/:article_id", handlers.ShowArticleEditPage)
 		// 수정된 데이터 처리하기
 		aritlcleRoutes.POST("/edit/:article_id", handlers.PerformUpdateArticle)
+		// 댓글 작성하기
+		aritlcleRoutes.POST("/view/:article_id/comment", handlers.CreateComment)
+		// 댓글 수정하기
+		//aritlcleRoutes.POST("/article/comment/update/:comment_id", handlers.UpdateComment)
+		aritlcleRoutes.POST("/comment/update/:comment_id", handlers.UpdateComment)
+		aritlcleRoutes.POST("/comment/delete/:comment_id", handlers.DeleteComment)
 	}
 
 	// 로그인

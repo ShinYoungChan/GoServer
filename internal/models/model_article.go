@@ -8,15 +8,24 @@ import (
 
 type Article struct {
 	gorm.Model
-	Title   string `gorm:"not null"`
-	Content string `gorm:"not null"`
-	UserID  uint
+	Title    string `gorm:"not null"`
+	Content  string `gorm:"not null"`
+	UserID   uint
+	Comments []Comment `gorm:"foreignKey:ArticleID"`
 }
 
 type User struct {
 	gorm.Model
 	Username string `gorm:"unique;not null"`
 	Password string `gorm:"not null"`
+}
+
+type Comment struct {
+	gorm.Model
+	Username  string
+	Content   string
+	ArticleID uint
+	UserID    uint
 }
 
 // Article 구조체 하단에 추가
@@ -27,6 +36,10 @@ func (a Article) FormattedCreatedAt() string {
 
 func (a Article) FormattedUpdatedAt() string {
 	return a.UpdatedAt.Format("2006-01-02 15:04")
+}
+
+func (c Comment) FormattedCreatedAt() string {
+	return c.CreatedAt.Format("2006-01-02 15:04")
 }
 
 /* gorm model 추가로 주석처리
@@ -72,4 +85,10 @@ func UpdateArticle(id int, userID uint, title, content string) {
 	var article Article
 	DB.First(&article, id)
 	DB.Model(&article).Updates(Article{Title: title, Content: content, UserID: userID})
+}
+
+func UpdateComment(id int, content string) {
+	var comment Comment
+	DB.First(&comment, id)
+	DB.Model(&comment).Updates(Comment{Content: content})
 }

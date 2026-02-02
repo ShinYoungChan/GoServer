@@ -32,6 +32,64 @@
     {{ end }}
 </div>
 
+<hr>
+<h3>댓글 작성</h3>
+<form action="/article/view/{{.articles.ID}}/comment" method="POST">
+    <textarea name="content" placeholder="댓글을 입력하세요" required></textarea>
+    <br>
+    <button type="submit">댓글 등록</button>
+</form>
+
+<hr>
+
+<h3>댓글 목록</h3>
+{{ range .articles.Comments }}
+<div id="comment-container-{{.ID}}">
+    <div id="view-mode-{{.ID}}">
+        <strong>{{ .Username }}</strong>: <span id="content-{{.ID}}">{{ .Content }}</span>
+        <p style="color: gray;">작성일: {{.FormattedCreatedAt}}</p>
+        {{ if eq $.user.ID .UserID }}
+            <button type="button" onclick="toggleEdit('{{.ID}}', true)">수정</button>
+            <button type="button" onclick="deleteComment('{{.ID}}')">삭제</button>
+        {{ end }}
+    </div>
+
+    <div id="edit-mode-{{.ID}}" style="display: none;">
+        <form action="/article/comment/update/{{.ID}}" method="POST">
+            <textarea name="content">{{ .Content }}</textarea>
+            <button type="submit">저장</button>
+            <button type="button" onclick="toggleEdit('{{.ID}}', false)">취소</button>
+        </form>
+    </div>
+</div>
+{{ end }}
+
+<script>
+function toggleEdit(id, isEdit) {
+    const viewDiv = document.getElementById(`view-mode-${id}`);
+    const editDiv = document.getElementById(`edit-mode-${id}`);
+    
+    if (isEdit) {
+        viewDiv.style.display = 'none';
+        editDiv.style.display = 'block';
+    } else {
+        viewDiv.style.display = 'block';
+        editDiv.style.display = 'none';
+    }
+}
+
+function deleteComment(id) {
+    if (confirm("정말 삭제하시겠습니까?")) {
+        // 삭제는 간단하게 POST로 처리하는 법을 추천드려요 (보안상 GET보다는 POST)
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/article/comment/delete/${id}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+
 <!--<button type="button" onclick="deleteArticle('{{.articles.ID}}')">삭제</button>-->
 <!--
 <script>
