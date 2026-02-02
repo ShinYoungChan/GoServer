@@ -22,25 +22,40 @@ func ShowIndexPage(c *gin.Context) {
 }
 
 func GetArticle(c *gin.Context) {
-	if articleID, err := strconv.Atoi(c.Param("article_id")); err == nil {
-		if article, err := models.GetArticleByID(articleID); err == nil {
-			// 1. 현재 로그인한 유저 정보를 가져옴
-			user := GetCurrentUser(c)
-			c.HTML(
-				http.StatusOK,
-				"article.html", // 상세 페이지 설계도
-				gin.H{
-					"title":    article.Title,
-					"articles": article, // 상세 페이지에선 이게 '글 하나'를 의미함
-					"user":     user,    // 2. 유저 정보를 보따리에 넣어줍니다
-				},
-			)
-		} else {
-			c.AbortWithError(http.StatusNotFound, err)
-		}
-	} else {
+	articleID := c.Param("article_id")
+	var article models.Article
+
+	// ⭐ Preload("Comments")를 추가하면 Article 구조체의 Comments 필드에 데이터가 자동으로 채워집니다.
+	if err := models.DB.Preload("Comments").First(&article, articleID).Error; err != nil {
 		c.AbortWithStatus(http.StatusNotFound)
+		return
 	}
+
+	c.HTML(http.StatusOK, "article.html", gin.H{
+		"articles": article, // 이제 .articles.Comments 로 템플릿에서 접근 가능!
+		"user":     GetCurrentUser(c),
+	})
+	/*
+		if articleID, err := strconv.Atoi(c.Param("article_id")); err == nil {
+			if article, err := models.GetArticleByID(articleID); err == nil {
+				// 1. 현재 로그인한 유저 정보를 가져옴
+				user := GetCurrentUser(c)
+				c.HTML(
+					http.StatusOK,
+					"article.html", // 상세 페이지 설계도
+					gin.H{
+						"title":    article.Title,
+						"articles": article, // 상세 페이지에선 이게 '글 하나'를 의미함
+						"user":     user,    // 2. 유저 정보를 보따리에 넣어줍니다
+					},
+				)
+			} else {
+				c.AbortWithError(http.StatusNotFound, err)
+			}
+		} else {
+			c.AbortWithStatus(http.StatusNotFound)
+		}
+	*/
 }
 
 func ShowArticleCreatePage(c *gin.Context) {
@@ -138,4 +153,56 @@ func PerformUpdateArticle(c *gin.Context) {
 
 	// PerformUpdateArticle 마지막 줄
 	c.Redirect(http.StatusSeeOther, "/article/view/"+strconv.Itoa(id))
+}
+
+func CreateComment(c *gin.Context) {
+	user := GetCurrentUser(c)
+	articleID, _ := strconv.Atoi(c.Param("article_id"))
+	content := c.PostForm("content")
+
+	comment := models.Comment{
+		Username:  user.Username,
+		Content:   content,
+		ArticleID: uint(articleID),
+		UserID:    user.ID,
+	}
+
+	models.DB.Create(&comment)
+
+	// 저장 후 다시 보던 게시글 상세 페이지로 리다이렉트!
+	c.Redirect(http.StatusSeeOther, "/article/view/"+strconv.Itoa(articleID))
+}
+
+func UpdateComment(c *gin.Context) {
+	user := GetCurrentUser(c)
+	commentID, _ := strconv.Atoi(c.Param("comment_id"))
+
+	var comment models.Comment
+	models.DB.First(&comment, commentID)
+
+	if user.ID != comment.UserID {
+		fmt.Printf("[ERROR] ID 불일치! USER ID[%s], COMMENT ID[%s]\n", user.ID, comment.UserID)
+	}
+
+	content := c.PostForm("content")
+
+	models.UpdateComment(commentID, content)
+	c.Redirect(http.StatusSeeOther, "/article/view/"+strconv.Itoa(int(comment.ArticleID)))
+}
+
+func DeleteComment(c *gin.Context) {
+	user := GetCurrentUser(c)
+	commentID := c.Param("comment_id")
+
+	var comment models.Comment
+	models.DB.First(&comment, commentID)
+
+	result := models.DB.Where("id = ? AND user_id = ?", commentID, user.ID).Delete(&models.Comment{})
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusForbidden, gin.H{"error": "삭제 권한이 없습니다."})
+		return
+	}
+
+	c.Redirect(http.StatusSeeOther, "/article/view/"+strconv.Itoa(int(comment.ArticleID)))
 }
