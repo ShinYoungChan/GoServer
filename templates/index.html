@@ -21,6 +21,11 @@
       <a href="/article/view/{{.ID}}">{{.Title}}</a>
       <small style="color: gray;">({{.FormattedCreatedAt}})</small>
   </li>
+  {{ if .Image }}
+            <div>
+                <img src="{{ .Image }}" alt="thumbnail" width="100">
+            </div>
+        {{ end }}
   {{ end }}
 </ul>
 

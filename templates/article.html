@@ -5,6 +5,9 @@
 
 <h1>{{.articles.Title}}</h1>
 <p>{{.articles.Content}}</p>
+{{ if .articles.Image }}
+    <img src = "{{.articles.Image}}" alt = "image" width = 500px>
+{{end}}
 <p style="color: gray;">작성일: {{.articles.FormattedCreatedAt}}</p>
 {{ if ne .articles.CreatedAt .article.UpdatedAt }}
     <p style="color: blue;">(수정됨: {{.articles.FormattedUpdatedAt}})</p>

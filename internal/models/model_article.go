@@ -11,6 +11,7 @@ type Article struct {
 	Title    string `gorm:"not null"`
 	Content  string `gorm:"not null"`
 	UserID   uint
+	Image    string    `gorm:"type:varchar(255)"`
 	Comments []Comment `gorm:"foreignKey:ArticleID"`
 }
 

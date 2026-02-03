@@ -36,6 +36,8 @@ func Register(r *gin.Engine) {
 		aritlcleRoutes.POST("/comment/delete/:comment_id", handlers.DeleteComment)
 	}
 
+	r.Static("/uploads", "./uploads")
+
 	// 로그인
 	r.GET("/login", handlers.ShowLoginPage)
 	r.POST("/login", handlers.PerformLogin)
