@@ -9,7 +9,9 @@ import (
 func Register(r *gin.Engine) {
 
 	// 인덱스 라우터 처리(Handle)
-	r.GET("/", handlers.ShowIndexPage)
+	//r.GET("/", handlers.ShowIndexPage)
+
+	r.GET("/", handlers.GetIndex)
 
 	aritlcleRoutes := r.Group("/article")
 	{

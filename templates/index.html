@@ -10,6 +10,11 @@
 </div>
 -->
 
+<form action="/" method="GET">
+    <input type="text" name="q" value="{{.query}}" placeholder="검색어를 입력하세요">
+    <button type="submit">검색</button>
+</form>
+
 <ul>
   {{ range .articles }}
   <li>
@@ -18,6 +23,38 @@
   </li>
   {{ end }}
 </ul>
+
+<style>
+    .pagination a { text-decoration: none; color: black; margin: 0 5px; }
+    .pagination .active { font-weight: bold; color: red; }
+</style>
+
+<div class="pagination">
+    {{ if .hasPrev }}
+        <a href="/?q={{.query}}&page={{.prevPage}}">[이전]</a>
+    {{ end }}
+
+    {{ range $i := .pageNums }}
+        <a href="/?q={{$.query}}&page={{$i}}">[{{$i}}]</a>
+    {{ end }}
+
+    {{ if .hasNext }}
+        <a href="/?q={{.query}}&page={{.nextPage}}">[다음]</a>
+    {{ end }}
+</div>
+
+<div style="margin-top: 10px;">
+    <input type="number" id="pageInput" min="1" max="{{.totalPages}}" value="{{.page}}" style="width: 50px;">
+    <button type="button" onclick="goToPage()">이동</button>
+</div>
+
+<script>
+function goToPage() {
+    const page = document.getElementById('pageInput').value;
+    const query = "{{.query}}"; // 현재 검색어 유지
+    location.href = `/?q=${query}&page=${page}`;
+}
+</script>
 
 {{ if .user }}
     <span>안녕하세요, <strong>{{ .user.Username }}</strong>님!</span>

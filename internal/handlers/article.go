@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -205,4 +206,50 @@ func DeleteComment(c *gin.Context) {
 	}
 
 	c.Redirect(http.StatusSeeOther, "/article/view/"+strconv.Itoa(int(comment.ArticleID)))
+}
+
+func GetIndex(c *gin.Context) {
+	searchQuery := c.Query("q")
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize := 5
+
+	var articles []models.Article
+	var totalCount int64 // 전체 게시글 수를 담을 변수
+
+	// 1. 쿼리 초기화
+	query := models.DB.Model(&models.Article{})
+
+	// 2. 검색 조건 적용
+	if searchQuery != "" {
+		query = query.Where("title LIKE ? OR content LIKE ?", "%"+searchQuery+"%", "%"+searchQuery+"%")
+	}
+
+	// 3. 페이징 적용 전! 전체 개수부터 센다 (이게 포인트!)
+	query.Count(&totalCount)
+
+	// 4. 페이징 적용해서 실제 데이터 가져오기
+	offset := (page - 1) * pageSize
+	query.Order("id DESC").Limit(pageSize).Offset(offset).Find(&articles)
+
+	// 5. 마지막 페이지 계산 (예: 13개면 3페이지까지 있어야 함)
+	// float64로 변환해서 계산 후 올림(math.Ceil)하는 게 정석입니다.
+	totalPages := int(math.Ceil(float64(totalCount) / float64(pageSize)))
+
+	var pageNums []int
+	for i := 1; i <= totalPages; i++ {
+		pageNums = append(pageNums, i)
+	}
+
+	// 핸들러 내부 예시 (이미 totalPages를 구한 상태라면)
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"articles":   articles,
+		"query":      searchQuery,
+		"page":       page,
+		"totalPages": totalPages,
+		"pageNums":   pageNums,
+		"hasPrev":    page > 1,          // 이전 페이지가 있는가? (bool)
+		"hasNext":    page < totalPages, // 다음 페이지가 있는가? (bool)
+		"prevPage":   page - 1,          // 이전 페이지 번호
+		"nextPage":   page + 1,          // 다음 페이지 번호
+	})
 }
