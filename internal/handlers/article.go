@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -77,10 +78,26 @@ func PerformCreateArticle(c *gin.Context) {
 		return
 	}
 
+	var imagePath string
+	file, err := c.FormFile("image")
+
+	if err == nil {
+		// 2. 파일이 있다면 저장 경로 설정 (중복 방지를 위해 파일명 앞에 시간을 붙이기도 함)
+		// 예: uploads/1672531200_photo.jpg
+		dst := "uploads/" + file.Filename
+
+		// 3. 서버 하드디스크에 파일 실제 저장
+		if err := c.SaveUploadedFile(file, dst); err != nil {
+			c.String(http.StatusInternalServerError, "파일 저장 실패")
+			return
+		}
+		imagePath = "/" + dst // DB에는 나중에 웹에서 접근할 경로 저장
+	}
+
 	title := c.PostForm("title")
 	content := c.PostForm(("content"))
 
-	article := models.Article{Title: title, Content: content, UserID: user.ID}
+	article := models.Article{Title: title, Content: content, UserID: user.ID, Image: imagePath}
 	models.DB.Create(&article)
 
 	c.Redirect(http.StatusSeeOther, "/")
@@ -96,6 +113,18 @@ func PerformDeleteArticle(c *gin.Context) {
 	// PerformArticleDelete 내부
 	fmt.Printf("현재 로그인 유저 ID: %d\n", user.ID)
 	fmt.Printf("글에 저장된 주인 ID: %d\n", article.UserID)
+
+	if article.Image != "" {
+		filePath := article.Image[1:]
+
+		fmt.Printf("파일경로: %s\n", filePath)
+
+		err := os.Remove(filePath)
+
+		if err != nil {
+			fmt.Println("파일 삭제 실패:", err)
+		}
+	}
 
 	if user == nil || article.UserID != user.ID {
 		c.JSON(http.StatusForbidden, gin.H{
@@ -212,6 +241,7 @@ func GetIndex(c *gin.Context) {
 	searchQuery := c.Query("q")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize := 5
+	user := GetCurrentUser(c) // 헬퍼 함수 사용!
 
 	var articles []models.Article
 	var totalCount int64 // 전체 게시글 수를 담을 변수
@@ -251,5 +281,6 @@ func GetIndex(c *gin.Context) {
 		"hasNext":    page < totalPages, // 다음 페이지가 있는가? (bool)
 		"prevPage":   page - 1,          // 이전 페이지 번호
 		"nextPage":   page + 1,          // 다음 페이지 번호
+		"user":       user,
 	})
 }
